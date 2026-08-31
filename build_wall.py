@@ -18,12 +18,23 @@ RX_MENTION = re.compile(r'(?<![\w@])@([A-Za-z0-9_]{1,15})\b')
 RX_HASH = re.compile(r'(?<![\w#])#([A-Za-z0-9_]+)')
 
 def linkify_plain(text):
-    """Linkify plain full text (fxTwitter): URLs, @mentions, #hashtags."""
-    e = esc(text)
-    e = RX_URL.sub(lambda m: f'<a href="{m.group(0)}" target="_blank" rel="noopener">{m.group(0)}</a>', e)
-    e = RX_MENTION.sub(lambda m: f'<a href="https://x.com/{m.group(1)}" target="_blank" rel="noopener">@{m.group(1)}</a>', e)
-    e = RX_HASH.sub(lambda m: f'<a href="https://x.com/hashtag/{m.group(1)}" target="_blank" rel="noopener">#{m.group(1)}</a>', e)
-    return e.replace('\n', '<br>')
+    """Linkify plain full text (fxTwitter): URLs, @mentions, #hashtags - span-based, no entity mangling."""
+    spans = []
+    for m in RX_URL.finditer(text):
+        spans.append((m.start(), m.end(),
+            f'<a href="{esc(m.group(0))}" target="_blank" rel="noopener">{esc(m.group(0))}</a>'))
+    for rx, mk in ((RX_MENTION, lambda m: f'<a href="https://x.com/{m.group(1)}" target="_blank" rel="noopener">@{esc(m.group(1))}</a>'),
+                   (RX_HASH, lambda m: f'<a href="https://x.com/hashtag/{m.group(1)}" target="_blank" rel="noopener">#{esc(m.group(1))}</a>')):
+        for m in rx.finditer(text):
+            spans.append((m.start(), m.end(), mk(m)))
+    spans.sort()
+    out, cur = [], 0
+    for a, b, rep in spans:
+        if a < cur:
+            continue
+        out.append(esc(text[cur:a])); out.append(rep); cur = b
+    out.append(esc(text[cur:]))
+    return ''.join(out).replace('\n', '<br>')
 
 def link_entities(text, entities):
     """Render tweet text with mentions/urls/hashtags linked; drop media t.co spans."""
@@ -106,7 +117,7 @@ def card_from_synd(s, fallback):
     fx_text = None
     fxp = f'/tmp/fx/{s.get("id_str", fallback["id"])}.json'
     if os.path.exists(fxp):
-        fxt = json.load(open(fxp)).get('text','')
+        fxt = html.unescape(json.load(open(fxp)).get('text',''))
         synd_visible = len(re.sub(r'https?://t\.co/\w+\s*$', '', s.get('text','')).strip())
         if len(fxt.strip()) > synd_visible + 10:
             fx_text = fxt.strip()
