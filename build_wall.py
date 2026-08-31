@@ -1,0 +1,236 @@
+import json, re, html, glob, os
+from datetime import datetime, timezone
+
+def parse_oembed(path):
+    d = json.load(open(path))
+    h = d["html"]
+    m = re.search(r'<p lang="(?P<lang>[^"]*)"', h)
+    lang = m.group("lang") if m else "en"
+    sid = re.search(r'/status/(\d+)', d["url"]).group(1)
+    handle = d["author_url"].rstrip("/").split("/")[-1]
+    return dict(id=sid, url=d["url"], author=d["author_name"], handle=handle,
+                lang=lang, embed_html=h)
+
+def esc(s): return html.escape(s or '', quote=True)
+
+def link_entities(text, entities):
+    """Render tweet text with mentions/urls/hashtags linked; drop media t.co spans."""
+    if text is None: return ""
+    spans = []
+    for m in (entities or {}).get('media', []) or []:
+        spans.append((m['indices'][0], m['indices'][1], ''))
+    for u in (entities or {}).get('urls', []) or []:
+        disp = u.get('display_url') or u.get('expanded_url') or u.get('url')
+        href = u.get('expanded_url') or u.get('url')
+        spans.append((u['indices'][0], u['indices'][1],
+                      f'<a href="{esc(href)}" target="_blank" rel="noopener">{esc(disp)}</a>'))
+    for um in (entities or {}).get('user_mentions', []) or []:
+        sn = um.get('screen_name','')
+        spans.append((um['indices'][0], um['indices'][1],
+                      f'<a href="https://x.com/{esc(sn)}" target="_blank" rel="noopener">@{esc(sn)}</a>'))
+    for htag in (entities or {}).get('hashtags', []) or []:
+        t = htag.get('text','')
+        spans.append((htag['indices'][0], htag['indices'][1],
+                      f'<a href="https://x.com/hashtag/{esc(t)}" target="_blank" rel="noopener">#{esc(t)}</a>'))
+    spans.sort()
+    out, cur = [], 0
+    for a, b, rep in spans:
+        if a < cur:  # overlapping span (e.g. media + url same range)
+            continue
+        out.append(esc(text[cur:a])); out.append(rep); cur = b
+    out.append(esc(text[cur:]))
+    return ''.join(out).replace('\n', '<br>')
+
+def media_html(md):
+    if not md: return ''
+    photos = [m for m in md if m.get('type') == 'photo']
+    vids   = [m for m in md if m.get('type') in ('video', 'animated_gif')]
+    parts = []
+    if photos:
+        n = len(photos)
+        cls = 'media1' if n == 1 else 'media2'
+        imgs = ''.join(f'<img src="{esc(p["media_url_https"])}?name=small" loading="lazy" alt="">' for p in photos[:4])
+        parts.append(f'<div class="media {cls}">{imgs}</div>')
+    for v in vids[:1]:
+        variants = [x for x in (v.get('video_info') or {}).get('variants', []) if x.get('content_type') == 'video/mp4']
+        variants.sort(key=lambda x: x.get('bitrate') or 0)
+        src = None
+        for x in variants:
+            if (x.get('bitrate') or 0) <= 2500000: src = x['url']
+        if not src and variants: src = variants[0]['url']
+        poster = v.get('media_url_https')
+        if src and v.get('type') == 'animated_gif':
+            parts.append(f'<video class="media vid" src="{esc(src)}" poster="{esc(poster)}" autoplay loop muted playsinline></video>')
+        elif src:
+            parts.append(f'<video class="media vid" src="{esc(src)}" poster="{esc(poster)}" controls preload="none" playsinline></video>')
+    return ''.join(parts)
+
+def quote_html(q):
+    if not q or not q.get('user'): return ''
+    u = q['user']; sn = u.get('screen_name','')
+    url = f'https://x.com/{sn}/status/{q.get("id_str","")}'
+    body = link_entities(q.get('text',''), q.get('entities'))
+    av = u.get('profile_image_url_https','')
+    return (f'<a class="quote" href="{esc(url)}" target="_blank" rel="noopener">'
+            f'<div class="qhead"><img class="qav" src="{esc(av)}" alt="">'
+            f'<b>{esc(u.get("name",""))}</b><span>@{esc(sn)}</span></div>'
+            f'<div class="qtext">{body}</div>{media_html(q.get("mediaDetails"))}</a>')
+
+def fmt_date(iso):
+    try:
+        dt = datetime.strptime(iso, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc)
+        return dt.strftime('%b %-d, %Y')
+    except Exception:
+        return ''
+
+def card_from_synd(s, fallback):
+    u = s.get('user') or {}
+    sn = u.get('screen_name') or fallback['handle']
+    name = u.get('name') or fallback['author']
+    av = u.get('profile_image_url_https','')
+    av = av.replace('_normal.', '_200x200.') if av else ''
+    body = link_entities(s.get('text',''), s.get('entities'))
+    media = media_html(s.get('mediaDetails'))
+    quote = quote_html(s.get('quoted_tweet'))
+    date = fmt_date(s.get('created_at',''))
+    favs = s.get('favorite_count') or 0
+    url = f'https://x.com/{sn}/status/{s.get("id_str", fallback["id"])}'
+    search = ' '.join((s.get('text','') + ' ' + name + ' @' + sn).lower().split())
+    return url, search, f'''<div class="tweet">
+  <div class="thead">
+    <img class="av" src="{esc(av)}" loading="lazy" alt="">
+    <div class="who"><b>{esc(name)}</b><span>@{esc(sn)}</span></div>
+    <a class="xlogo" href="{esc(url)}" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">{body}</div>
+  {media}{quote}
+  <div class="tfoot"><span class="date">{esc(date)}</span><span class="fav">&hearts; {favs:,}</span><a href="{esc(url)}" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div>'''
+
+def card_from_oembed(p):
+    h = p['embed_html']
+    pm = re.search(r'<blockquote[^>]*>(.*)</blockquote>', h, re.S)
+    inner = pm.group(1) if pm else h
+    dm = re.search(r'>([A-Z][a-z]+ \d{1,2}, \d{4})</a>', h)
+    date = dm.group(1) if dm else ''
+    text = html.unescape(re.sub(r'<[^>]+>', ' ', inner))
+    search = ' '.join((text + ' ' + p['author'] + ' @' + p['handle']).lower().split())
+    inner = inner.replace('twsrc%5Etfw', 'twsrc%5Etfw')
+    return p['url'], search, f'''<div class="tweet">
+  <div class="thead"><div class="who"><b>{esc(p["author"])}</b><span>@{esc(p["handle"])}</span></div></div>
+  <div class="ttext fallback">{inner}</div>
+  <div class="tfoot"><span class="date">{esc(date)}</span><a href="{esc(p["url"])}" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div>'''
+
+posts = [parse_oembed(f) for f in glob.glob("/tmp/oembed/*.json")]
+posts = [p for p in posts if not p["lang"].lower().startswith("zh")]
+posts.sort(key=lambda p: int(p["id"]), reverse=True)
+now = datetime.now(timezone.utc).astimezone().strftime("%b %-d, %Y, %-I:%M %p %Z")
+today = datetime.now(timezone.utc).astimezone().strftime("%B %-d")
+
+cards = []
+nsynd = 0
+today_count = 0
+today_str = datetime.now(timezone.utc).astimezone().strftime("%b %-d, %Y")
+for p in posts:
+    sp = f'/tmp/synd/{p["id"]}.json'
+    if os.path.exists(sp):
+        s = json.load(open(sp))
+        url, search, card = card_from_synd(s, p)
+        nsynd += 1
+        if fmt_date(s.get('created_at','')) == today_str:
+            today_count += 1
+    else:
+        url, search, card = card_from_oembed(p)
+        if today in p.get("embed_html", ""):
+            today_count += 1
+    ds = esc(search)
+    cards.append(f'<div class="card" data-search="{ds}">{card}</div>')
+
+page = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grok Bot - Wall of X</title>
+<style>
+  :root {{ --bg:#000; --border:#2f3336; --text:#e7e9ea; --dim:#71767b; --accent:#1d9bf0; }}
+  * {{ box-sizing:border-box; margin:0; padding:0; }}
+  body {{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }}
+  .wrap {{ max-width:1560px; margin:0 auto; padding:28px 16px 60px; }}
+  header.top {{ display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 16px; margin-bottom:6px; }}
+  h1 {{ font-size:26px; letter-spacing:-0.3px; }}
+  h1 .x {{ color:var(--accent); }}
+  .sub {{ color:var(--dim); font-size:14px; margin-bottom:20px; }}
+  .sub b {{ color:#a8b0b8; font-weight:600; }}
+  .controls {{ position:sticky; top:0; background:var(--bg); padding:10px 0 14px; z-index:5; }}
+  #q {{ width:100%; max-width:420px; background:#16181c; border:1px solid var(--border); border-radius:999px;
+        padding:10px 18px; color:var(--text); font-size:15px; outline:none; }}
+  #q:focus {{ border-color:var(--accent); }}
+  .wall {{ column-count:3; column-gap:16px; }}
+  @media (max-width:1100px) {{ .wall {{ column-count:2; }} }}
+  @media (max-width:680px) {{ .wall {{ column-count:1; }} }}
+  .card {{ break-inside:avoid; margin-bottom:16px; display:inline-block; width:100%;
+          border:1px solid var(--border); border-radius:16px; padding:14px 16px 10px; }}
+  .tweet .thead {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
+  .tweet .av {{ width:40px; height:40px; border-radius:50%; background:#16181c; }}
+  .tweet .who {{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }}
+  .tweet .who b {{ font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+  .tweet .who span {{ color:var(--dim); font-size:14px; }}
+  .tweet .xlogo {{ margin-left:auto; color:var(--text); opacity:.85; }}
+  .tweet .ttext {{ font-size:15px; line-height:1.45; word-wrap:break-word; }}
+  .tweet .ttext a {{ color:var(--accent); text-decoration:none; }}
+  .tweet .ttext.fallback p {{ margin:0; }}
+  .tweet .media {{ margin-top:10px; border-radius:14px; overflow:hidden; border:1px solid var(--border); display:grid; gap:2px; }}
+  .tweet .media.media2 {{ grid-template-columns:1fr 1fr; }}
+  .tweet .media img {{ width:100%; height:100%; object-fit:cover; display:block; max-height:340px; }}
+  .tweet video.media {{ width:100%; display:block; max-height:420px; background:#000; }}
+  .tweet a.quote {{ display:block; margin-top:10px; border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+                    text-decoration:none; color:var(--text); }}
+  .tweet a.quote:hover {{ background:#16181c; }}
+  .tweet .qhead {{ display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:14px; }}
+  .tweet .qhead img.qav {{ width:20px; height:20px; border-radius:50%; }}
+  .tweet .qhead span {{ color:var(--dim); }}
+  .tweet .qtext {{ font-size:14px; line-height:1.4; color:#d7d9db; }}
+  .tweet .qtext a {{ color:var(--accent); text-decoration:none; }}
+  .tweet .tfoot {{ display:flex; gap:14px; align-items:center; margin-top:10px; color:var(--dim); font-size:13px; }}
+  .tweet .tfoot a {{ color:var(--dim); text-decoration:none; margin-left:auto; }}
+  .tweet .tfoot a:hover {{ color:var(--accent); }}
+  .badge {{ background:#1d9bf022; color:var(--accent); border-radius:999px; padding:3px 10px; font-size:13px; font-weight:600; }}
+  .none {{ color:var(--dim); text-align:center; padding:40px; display:none; }}
+  footer.site {{ color:var(--dim); font-size:13px; margin-top:26px; text-align:center; }}
+  footer.site a {{ color:var(--accent); text-decoration:none; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Grok Bot <span class="x">/ wall of X</span></h1>
+    <span class="badge">{today_count} posts today</span>
+  </header>
+  <p class="sub"><b>{len(posts)} recent X posts</b> about Grok Bot, newest first &middot; refreshed {now}</p>
+  <div class="controls"><input id="q" type="search" placeholder="Filter posts&hellip;" oninput="filt()"></div>
+  <main class="wall" id="wall">
+  {"".join(cards)}
+  </main>
+  <p class="none" id="none">No posts match.</p>
+  <footer class="site">Real X posts rendered inline - full text, media included - refreshed daily.</footer>
+</div>
+<script>
+function filt() {{
+  var q = document.getElementById('q').value.toLowerCase();
+  var cards = document.querySelectorAll('.card'); var n = 0;
+  cards.forEach(function(c) {{
+    var hit = !q || (c.getAttribute('data-search')||'').includes(q);
+    c.style.display = hit ? '' : 'none'; if (hit) n++;
+  }});
+  document.getElementById('none').style.display = n ? 'none' : 'block';
+}}
+</script>
+</body>
+</html>'''
+
+os.makedirs("/downloads", exist_ok=True)
+with open("/downloads/grokbot-wall.html", "w") as f:
+    f.write(page)
+print(f"wrote {len(posts)} posts ({nsynd} via syndication, {today_count} today), zh excluded")
