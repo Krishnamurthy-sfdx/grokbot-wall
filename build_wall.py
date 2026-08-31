@@ -183,7 +183,7 @@ for p in posts:
         if today in p.get("embed_html", ""):
             today_count += 1
     ds = esc(search)
-    cards.append(f'<div class="card" data-search="{ds}">{card}</div>')
+    cards.append(f'<div class="card" data-search="{ds}"><div class="render-custom">{card}</div><div class="render-widget">{p["embed_html"]}</div></div>')
 
 page = f'''<!DOCTYPE html>
 <html lang="en">
@@ -211,6 +211,14 @@ page = f'''<!DOCTYPE html>
   @media (max-width:680px) {{ .wall {{ column-count:1; }} }}
   .card {{ break-inside:avoid; margin-bottom:16px; display:inline-block; width:100%;
           border:1px solid var(--border); border-radius:16px; padding:14px 16px 10px; background:#fff; color:var(--text); }}
+  body.mode-widget .card {{ border:none; padding:0; background:transparent; }}
+  body.mode-widget .render-custom {{ display:none; }}
+  body.mode-custom .render-widget {{ display:none; }}
+  .render-widget blockquote.twitter-tweet {{ margin:0; }}
+  .modes {{ display:flex; gap:8px; margin-top:10px; }}
+  .modes button {{ background:#16181c; border:1px solid #2f3336; color:var(--page-dim); border-radius:999px;
+                   padding:6px 14px; font-size:13px; cursor:pointer; }}
+  .modes button.active {{ background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }}
   .tweet .thead {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
   .tweet .av {{ width:40px; height:40px; border-radius:50%; background:var(--soft); }}
   .tweet .who {{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }}
@@ -244,20 +252,47 @@ page = f'''<!DOCTYPE html>
 </style>
 </head>
 <body>
+<script>
+var savedMode = localStorage.getItem('wallmode') || 'custom';
+document.body.className = 'mode-' + savedMode;
+</script>
 <div class="wrap">
   <header class="top">
     <h1>Grok Bot <span class="x">/ wall of X</span></h1>
     <span class="badge">{today_count} posts today</span>
   </header>
   <p class="sub"><b>{len(posts)} recent X posts</b> about Grok Bot, newest first &middot; refreshed {now}</p>
-  <div class="controls"><input id="q" type="search" placeholder="Filter posts&hellip;" oninput="filt()"></div>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Filter posts&hellip;" oninput="filt()">
+    <div class="modes">
+      <button id="m-custom" onclick="setMode('custom')">Full text</button>
+      <button id="m-widget" onclick="setMode('widget')">X embed &middot; classic</button>
+    </div>
+  </div>
   <main class="wall" id="wall">
   {"".join(cards)}
   </main>
   <p class="none" id="none">No posts match.</p>
-  <footer class="site">Real X posts rendered inline - full text, media included - refreshed daily.</footer>
+  <footer class="site">Real X posts, full text inline - switch to X embed &middot; classic for the native widget look - refreshed daily.</footer>
 </div>
 <script>
+var widgetsLoaded = false;
+function loadWidgets() {{
+  if (widgetsLoaded) return;
+  widgetsLoaded = true;
+  var sc = document.createElement('script');
+  sc.src = 'https://platform.twitter.com/widgets.js';
+  sc.async = true; sc.charset = 'utf-8';
+  document.head.appendChild(sc);
+}}
+function setMode(m) {{
+  localStorage.setItem('wallmode', m);
+  document.body.className = 'mode-' + m;
+  document.getElementById('m-custom').className = m === 'custom' ? 'active' : '';
+  document.getElementById('m-widget').className = m === 'widget' ? 'active' : '';
+  if (m === 'widget') loadWidgets();
+}}
+setMode(savedMode);
 function filt() {{
   var q = document.getElementById('q').value.toLowerCase();
   var cards = document.querySelectorAll('.card'); var n = 0;
