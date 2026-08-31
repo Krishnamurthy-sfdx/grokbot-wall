@@ -14,7 +14,7 @@ A daily pipeline (7:00 AM SGT) rebuilds the wall as a single static HTML page:
 4. **Render** - `build_wall.py` renders each post as a self-contained X-style card: avatar, author, full text with linked mentions/hashtags/URLs, photo grids, native video players, nested quote boxes, date, and like count. No iframes, no X widgets.js - posts render complete, never truncated behind a "Show more".
 5. **Deploy** - the page is uploaded to Vercel via its REST API and the project aliases are pointed at the new deployment.
 
-The result is one ~95KB HTML file with a client-side filter box and a responsive masonry layout (3/2/1 columns).
+The result is one static HTML file (~165KB) with a client-side filter box, a responsive masonry layout (3/2/1 columns), and a view-mode toggle: **Full text** (the custom full-text cards, default) or **X embed - classic** (X's native widget embeds, lazy-loaded on first use; long posts show X's own "Show more" there). The choice persists in localStorage.
 
 ## Files
 
