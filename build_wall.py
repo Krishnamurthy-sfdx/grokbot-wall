@@ -13,6 +13,18 @@ def parse_oembed(path):
 
 def esc(s): return html.escape(s or '', quote=True)
 
+RX_URL = re.compile(r'https?://[^\s<>"]+')
+RX_MENTION = re.compile(r'(?<![\w@])@([A-Za-z0-9_]{1,15})\b')
+RX_HASH = re.compile(r'(?<![\w#])#([A-Za-z0-9_]+)')
+
+def linkify_plain(text):
+    """Linkify plain full text (fxTwitter): URLs, @mentions, #hashtags."""
+    e = esc(text)
+    e = RX_URL.sub(lambda m: f'<a href="{m.group(0)}" target="_blank" rel="noopener">{m.group(0)}</a>', e)
+    e = RX_MENTION.sub(lambda m: f'<a href="https://x.com/{m.group(1)}" target="_blank" rel="noopener">@{m.group(1)}</a>', e)
+    e = RX_HASH.sub(lambda m: f'<a href="https://x.com/hashtag/{m.group(1)}" target="_blank" rel="noopener">#{m.group(1)}</a>', e)
+    return e.replace('\n', '<br>')
+
 def link_entities(text, entities):
     """Render tweet text with mentions/urls/hashtags linked; drop media t.co spans."""
     if text is None: return ""
@@ -90,12 +102,26 @@ def card_from_synd(s, fallback):
     av = u.get('profile_image_url_https','')
     av = av.replace('_normal.', '_200x200.') if av else ''
     body = link_entities(s.get('text',''), s.get('entities'))
+    long_post = ('note_tweet' in s) and (s.get('display_text_range') or [0,0])[1] >= 280
+    fx_text = None
+    fxp = f'/tmp/fx/{s.get("id_str", fallback["id"])}.json'
+    if os.path.exists(fxp):
+        fxt = json.load(open(fxp)).get('text','')
+        synd_visible = len(re.sub(r'https?://t\.co/\w+\s*$', '', s.get('text','')).strip())
+        if len(fxt.strip()) > synd_visible + 10:
+            fx_text = fxt.strip()
+            body = linkify_plain(fx_text)
+            long_post = False
+    if long_post:
+        body = body.rstrip()
+        if not body.endswith('&hellip;'):
+            body += ' &hellip;'
     media = media_html(s.get('mediaDetails'))
     quote = quote_html(s.get('quoted_tweet'))
     date = fmt_date(s.get('created_at',''))
     favs = s.get('favorite_count') or 0
     url = f'https://x.com/{sn}/status/{s.get("id_str", fallback["id"])}'
-    search = ' '.join((s.get('text','') + ' ' + name + ' @' + sn).lower().split())
+    search = ' '.join(((fx_text or s.get('text','')) + ' ' + name + ' @' + sn).lower().split())
     return url, search, f'''<div class="tweet">
   <div class="thead">
     <img class="av" src="{esc(av)}" loading="lazy" alt="">
@@ -104,6 +130,7 @@ def card_from_synd(s, fallback):
   </div>
   <div class="ttext">{body}</div>
   {media}{quote}
+  {f'<div class="longpost">Long post - <a href="{esc(url)}" target="_blank" rel="noopener">read it in full on X &nearr;</a></div>' if long_post else ''}
   <div class="tfoot"><span class="date">{esc(date)}</span><span class="fav">&hearts; {favs:,}</span><a href="{esc(url)}" target="_blank" rel="noopener">Open on X &nearr;</a></div>
 </div>'''
 
@@ -154,7 +181,7 @@ page = f'''<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grok Bot - Wall of X</title>
 <style>
-  :root {{ --bg:#000; --border:#2f3336; --text:#e7e9ea; --dim:#71767b; --accent:#1d9bf0; }}
+  :root {{ --bg:#ffffff; --border:#cfd9de; --text:#0f1419; --dim:#536471; --accent:#1d9bf0; --soft:#f7f9f9; }}
   * {{ box-sizing:border-box; margin:0; padding:0; }}
   body {{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }}
   .wrap {{ max-width:1560px; margin:0 auto; padding:28px 16px 60px; }}
@@ -162,18 +189,18 @@ page = f'''<!DOCTYPE html>
   h1 {{ font-size:26px; letter-spacing:-0.3px; }}
   h1 .x {{ color:var(--accent); }}
   .sub {{ color:var(--dim); font-size:14px; margin-bottom:20px; }}
-  .sub b {{ color:#a8b0b8; font-weight:600; }}
+  .sub b {{ color:#3b4249; font-weight:600; }}
   .controls {{ position:sticky; top:0; background:var(--bg); padding:10px 0 14px; z-index:5; }}
-  #q {{ width:100%; max-width:420px; background:#16181c; border:1px solid var(--border); border-radius:999px;
+  #q {{ width:100%; max-width:420px; background:var(--soft); border:1px solid var(--border); border-radius:999px;
         padding:10px 18px; color:var(--text); font-size:15px; outline:none; }}
-  #q:focus {{ border-color:var(--accent); }}
+  #q:focus {{ border-color:var(--accent); background:#fff; }}
   .wall {{ column-count:3; column-gap:16px; }}
   @media (max-width:1100px) {{ .wall {{ column-count:2; }} }}
   @media (max-width:680px) {{ .wall {{ column-count:1; }} }}
   .card {{ break-inside:avoid; margin-bottom:16px; display:inline-block; width:100%;
-          border:1px solid var(--border); border-radius:16px; padding:14px 16px 10px; }}
+          border:1px solid var(--border); border-radius:16px; padding:14px 16px 10px; background:#fff; }}
   .tweet .thead {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
-  .tweet .av {{ width:40px; height:40px; border-radius:50%; background:#16181c; }}
+  .tweet .av {{ width:40px; height:40px; border-radius:50%; background:var(--soft); }}
   .tweet .who {{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }}
   .tweet .who b {{ font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
   .tweet .who span {{ color:var(--dim); font-size:14px; }}
@@ -187,12 +214,14 @@ page = f'''<!DOCTYPE html>
   .tweet video.media {{ width:100%; display:block; max-height:420px; background:#000; }}
   .tweet a.quote {{ display:block; margin-top:10px; border:1px solid var(--border); border-radius:14px; padding:10px 12px;
                     text-decoration:none; color:var(--text); }}
-  .tweet a.quote:hover {{ background:#16181c; }}
+  .tweet a.quote:hover {{ background:var(--soft); }}
   .tweet .qhead {{ display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:14px; }}
   .tweet .qhead img.qav {{ width:20px; height:20px; border-radius:50%; }}
   .tweet .qhead span {{ color:var(--dim); }}
-  .tweet .qtext {{ font-size:14px; line-height:1.4; color:#d7d9db; }}
+  .tweet .qtext {{ font-size:14px; line-height:1.4; color:#2f3336; }}
   .tweet .qtext a {{ color:var(--accent); text-decoration:none; }}
+  .tweet .longpost {{ margin-top:10px; font-size:14px; color:var(--dim); }}
+  .tweet .longpost a {{ color:var(--accent); text-decoration:none; font-weight:600; }}
   .tweet .tfoot {{ display:flex; gap:14px; align-items:center; margin-top:10px; color:var(--dim); font-size:13px; }}
   .tweet .tfoot a {{ color:var(--dim); text-decoration:none; margin-left:auto; }}
   .tweet .tfoot a:hover {{ color:var(--accent); }}
