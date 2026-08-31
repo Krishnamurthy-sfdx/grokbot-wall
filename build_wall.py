@@ -183,7 +183,7 @@ for p in posts:
         if today in p.get("embed_html", ""):
             today_count += 1
     ds = esc(search)
-    cards.append(f'<div class="card" data-search="{ds}"><div class="render-custom">{card}</div><div class="render-widget">{p["embed_html"]}</div></div>')
+    cards.append(f'<div class="card" data-search="{ds}"><div class="render-custom">{card}</div><div class="render-widget"><template>{p["embed_html"]}</template></div></div>')
 
 page = f'''<!DOCTYPE html>
 <html lang="en">
@@ -215,6 +215,7 @@ page = f'''<!DOCTYPE html>
   body.mode-widget .render-custom {{ display:none; }}
   body.mode-custom .render-widget {{ display:none; }}
   .render-widget blockquote.twitter-tweet {{ margin:0; }}
+  body.mode-widget .render-widget {{ display:block; background:#fff; border-radius:14px; overflow:hidden; min-height:220px; }}
   .modes {{ display:flex; gap:8px; margin-top:10px; }}
   .modes button {{ background:#16181c; border:1px solid #2f3336; color:var(--page-dim); border-radius:999px;
                    padding:6px 14px; font-size:13px; cursor:pointer; }}
@@ -276,13 +277,46 @@ document.body.className = 'mode-' + savedMode;
   <footer class="site">Real X posts, full text inline - switch to X embed &middot; classic for the native widget look - refreshed daily.</footer>
 </div>
 <script>
+var widgetObserver = null;
+function hydrateWidget(w) {{
+  var t = w.querySelector('template');
+  if (!t) return true;
+  if (!window.twttr || !twttr.widgets || !twttr.widgets.load) return false;
+  w.appendChild(t.content.cloneNode(true));
+  t.remove();
+  twttr.widgets.load(w);
+  return true;
+}}
+function startWidgetObserver() {{
+  if (widgetObserver) {{ document.querySelectorAll('.render-widget').forEach(function(w) {{ widgetObserver.observe(w); }}); return; }}
+  widgetObserver = new IntersectionObserver(function(entries) {{
+    entries.forEach(function(en) {{
+      if (en.isIntersecting) {{
+        var r = en.target.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) return;
+        if (hydrateWidget(en.target)) widgetObserver.unobserve(en.target);
+      }}
+    }});
+  }}, {{ rootMargin: '800px' }});
+  document.querySelectorAll('.render-widget').forEach(function(w) {{ widgetObserver.observe(w); }});
+}}
+setInterval(function() {{
+  if (!document.body.classList.contains('mode-widget')) return;
+  document.querySelectorAll('.render-widget').forEach(function(w) {{
+    if (!w.querySelector('template')) return;
+    var r = w.getBoundingClientRect();
+    if (r.width === 0) return;
+    if (r.top < window.innerHeight + 800 && r.bottom > -800) hydrateWidget(w);
+  }});
+}}, 1500);
 var widgetsLoaded = false;
 function loadWidgets() {{
-  if (widgetsLoaded) return;
+  if (widgetsLoaded) {{ startWidgetObserver(); return; }}
   widgetsLoaded = true;
   var sc = document.createElement('script');
   sc.src = 'https://platform.twitter.com/widgets.js';
   sc.async = true; sc.charset = 'utf-8';
+  sc.onload = function() {{ if (window.twttr && twttr.ready) {{ twttr.ready(startWidgetObserver); }} else {{ startWidgetObserver(); }} }};
   document.head.appendChild(sc);
 }}
 function setMode(m) {{
