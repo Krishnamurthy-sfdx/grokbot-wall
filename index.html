@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grok Bot - Wall of X</title>
+<style>
+  :root { --bg:#000; --border:#2f3336; --text:#e7e9ea; --dim:#71767b; --accent:#1d9bf0; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:1560px; margin:0 auto; padding:28px 16px 60px; }
+  header.top { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 16px; margin-bottom:6px; }
+  h1 { font-size:26px; letter-spacing:-0.3px; }
+  h1 .x { color:var(--accent); }
+  .sub { color:var(--dim); font-size:14px; margin-bottom:20px; }
+  .sub b { color:#a8b0b8; font-weight:600; }
+  .controls { position:sticky; top:0; background:var(--bg); padding:10px 0 14px; z-index:5; }
+  #q { width:100%; max-width:420px; background:#16181c; border:1px solid var(--border); border-radius:999px;
+        padding:10px 18px; color:var(--text); font-size:15px; outline:none; }
+  #q:focus { border-color:var(--accent); }
+  .wall { column-count:3; column-gap:16px; }
+  @media (max-width:1100px) { .wall { column-count:2; } }
+  @media (max-width:680px) { .wall { column-count:1; } }
+  .card { break-inside:avoid; margin-bottom:16px; display:inline-block; width:100%;
+          border:1px solid var(--border); border-radius:16px; padding:14px 16px 10px; }
+  .tweet .thead { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .tweet .av { width:40px; height:40px; border-radius:50%; background:#16181c; }
+  .tweet .who { display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+  .tweet .who b { font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tweet .who span { color:var(--dim); font-size:14px; }
+  .tweet .xlogo { margin-left:auto; color:var(--text); opacity:.85; }
+  .tweet .ttext { font-size:15px; line-height:1.45; word-wrap:break-word; }
+  .tweet .ttext a { color:var(--accent); text-decoration:none; }
+  .tweet .ttext.fallback p { margin:0; }
+  .tweet .media { margin-top:10px; border-radius:14px; overflow:hidden; border:1px solid var(--border); display:grid; gap:2px; }
+  .tweet .media.media2 { grid-template-columns:1fr 1fr; }
+  .tweet .media img { width:100%; height:100%; object-fit:cover; display:block; max-height:340px; }
+  .tweet video.media { width:100%; display:block; max-height:420px; background:#000; }
+  .tweet a.quote { display:block; margin-top:10px; border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+                    text-decoration:none; color:var(--text); }
+  .tweet a.quote:hover { background:#16181c; }
+  .tweet .qhead { display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:14px; }
+  .tweet .qhead img.qav { width:20px; height:20px; border-radius:50%; }
+  .tweet .qhead span { color:var(--dim); }
+  .tweet .qtext { font-size:14px; line-height:1.4; color:#d7d9db; }
+  .tweet .qtext a { color:var(--accent); text-decoration:none; }
+  .tweet .tfoot { display:flex; gap:14px; align-items:center; margin-top:10px; color:var(--dim); font-size:13px; }
+  .tweet .tfoot a { color:var(--dim); text-decoration:none; margin-left:auto; }
+  .tweet .tfoot a:hover { color:var(--accent); }
+  .badge { background:#1d9bf022; color:var(--accent); border-radius:999px; padding:3px 10px; font-size:13px; font-weight:600; }
+  .none { color:var(--dim); text-align:center; padding:40px; display:none; }
+  footer.site { color:var(--dim); font-size:13px; margin-top:26px; text-align:center; }
+  footer.site a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Grok Bot <span class="x">/ wall of X</span></h1>
+    <span class="badge">0 posts today</span>
+  </header>
+  <p class="sub"><b>49 recent X posts</b> about Grok Bot, newest first &middot; refreshed Aug 31, 2026, 11:27 AM +08</p>
+  <div class="controls"><input id="q" type="search" placeholder="Filter posts&hellip;" oninput="filt()"></div>
+  <main class="wall" id="wall">
+  <div class="card" data-search="so i had an annoying task where the only option was to screen scrape data - no download options, no api. grok bot to the rescue! it&#x27;s able to read, understand and interact with web pages. no need to tell it how to run the pages, it is smart enough to figure it all out. it isn&#x27;t https://t.co/oki8bxqpus phil trubey @ptrubey"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1587830540828176384/pluxUsgh_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Phil Trubey</b><span>@PTrubey</span></div>
+    <a class="xlogo" href="https://x.com/PTrubey/status/2094186354657862136" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">So I had an annoying task where the only option was to screen scrape data - no download options, no API. <br><br>Grok bot to the rescue! It&#x27;s able to read, understand and interact with web pages. No need to tell it how to run the pages, it is smart enough to figure it all out. It isn&#x27;t </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HRALO34akAAdtQY.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 18</span><a href="https://x.com/PTrubey/status/2094186354657862136" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i just built a complete ai rent-tracking system using a custom grok bot—and it’s pretty incredible what it can do. here’s how i set it up: 1.) i created a separate gmail account used only for rental payments and tenant communication. 2.) i connected payment notifications from scott @therentalpro"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2045928509252763648/mBwAq07W_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Scott</b><span>@therentalpro</span></div>
+    <a class="xlogo" href="https://x.com/therentalpro/status/2094185084630995304" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">I just built a complete AI rent-tracking system using a custom Grok bot—and it’s pretty incredible what it can do.<br><br>Here’s how I set it up:<br><br>1.) I created a separate Gmail account used only for rental payments and tenant communication.<br><br>2.) I connected payment notifications from</div>
+  
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 4</span><a href="https://x.com/therentalpro/status/2094185084630995304" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="f**king insane, day 2 of grok bot trying to cure milka, and the first 7 molecules finally reach the gate 9 agents, 1 patient, 9,665 papers screened, 0 candidates, 0 doses. milka is 4.1 kg at 1.4/10 mobility, and today the crew stops writing charters and starts running the https://t.co/1jujln3ope spike 1% @spikecalls"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2076112281495089152/fGYhWKfn_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Spike 1%</b><span>@SpikeCalls</span></div>
+    <a class="xlogo" href="https://x.com/SpikeCalls/status/2094184552394613084" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">F**KING INSANE, DAY 2 OF GROK BOT TRYING TO CURE MILKA, AND THE FIRST 7 MOLECULES FINALLY REACH THE GATE<br><br>9 agents, 1 patient, 9,665 papers screened, 0 candidates, 0 doses. milka is 4.1 kg at 1.4/10 mobility, and today the crew stops writing charters and starts running the </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2094183211551051777/vid/avc1/960x720/DIbv6OJIpYpU9OgB.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2094183211551051777/img/hUodPSGNvnOSwEIB.jpg" controls preload="none" playsinline></video><a class="quote" href="https://x.com/SpikeCalls/status/2093719225999171665" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2076112281495089152/fGYhWKfn_normal.jpg" alt=""><b>Spike 1%</b><span>@SpikeCalls</span></div><div class="qtext">F**KING INSANE, GROK BOT IS TRYING TO CURE MILKA, A 6-YEAR-OLD CAT WITH A DISEASE THAT HAS NO RECORDED CURE<br><br>9 agents, 1 patient, 9,665 papers screened, 0 candidates, 0 doses. milka is 4.1 kg at 1.4/10 mobility, and on day 2 the crew finally gets the structure it needs to start </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093718890459140096/vid/avc1/1280x720/7c1OkT6eU8HSBMm0.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093718890459140096/img/8kuSo2UeYSNCfDUQ.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 8</span><a href="https://x.com/SpikeCalls/status/2094184552394613084" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="check out this music video based on psalm 13 from the bible. used grok bot @bot to help with video editing and syncing lyrics. the little girl represents my daughter who is on a journey overcoming her fears and meets a cute fox friend that represents the holy spirit who helps her https://t.co/apfvoyllr9 timothy fiore @tfiore22"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1657383644401397769/HffKS_ER_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Timothy Fiore</b><span>@tfiore22</span></div>
+    <a class="xlogo" href="https://x.com/tfiore22/status/2094173551829885268" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Check out this music video based on Psalm 13 from the Bible. Used Grok Bot <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> to help with video editing and syncing lyrics. The little girl represents my daughter who is on a journey overcoming her fears and meets a cute fox friend that represents the Holy Spirit who helps her </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2094171843619938304/vid/avc1/1280x720/nl4PdQNCxmoOcPoT.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2094171843619938304/img/l1QKsoC45HK4bJGL.jpg" controls preload="none" playsinline></video>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 0</span><a href="https://x.com/tfiore22/status/2094173551829885268" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="chapter 7: hold 4 (short sci-fi by grok @bot) the next rib was still whistling. hale did not bring a plate. they walked the ore rails to hold 4. the paint was older than the stack marker. empty. no rock. against the bone, lashed and still in shop tape, three curved sheets sat https://t.co/rjljpw2z7g yun-ta tsai @yunta_tsai"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2035915849819938816/b6kIsNMe_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Yun-Ta Tsai</b><span>@yunta_tsai</span></div>
+    <a class="xlogo" href="https://x.com/yunta_tsai/status/2094168668683092335" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Chapter 7: Hold 4 (short sci-fi by Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a>)<br><br>The next rib was still whistling. Hale did not bring a plate.<br><br>They walked the ore rails to HOLD 4. The paint was older than the stack marker. Empty. No rock. Against the bone, lashed and still in shop tape, three curved sheets sat </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ_7TbYbkAAg2Bv.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/yunta_tsai/status/2093857680314310840" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2035915849819938816/b6kIsNMe_normal.jpg" alt=""><b>Yun-Ta Tsai</b><span>@yunta_tsai</span></div><div class="qtext">Chapter 6: The Rib (short sci-fi by Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a>)<br><br>The shift tone found her already in the stack. The next cable was sized. The LED still said 0.63 and 51 and CHARTER SESSION OPEN. The man on the crate had slept there. The margin of his paper was darker.<br><br>Hale did not say stack this </div><div class="media media1"><img src="https://pbs.twimg.com/media/HQ7gcp-bkAAu-_y.jpg?name=small" loading="lazy" alt=""></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 22</span><a href="https://x.com/yunta_tsai/status/2094168668683092335" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="take a look at my grok @bot ebay team. • talks to ebay through the developer api • scouts slab deals onchain via @traded_gg and @collector_crypt • buy → vault redeem → slab comes home • lists on ebay, priced off pokemonpricetracker solds can also just run the store: https://t.co/c0pe4dz5zq thepaypay 🦇🔊🦙 @th3paypay"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2085171614459858944/5VvMv8JM_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>thepaypay 🦇🔊🦙</b><span>@th3paypay</span></div>
+    <a class="xlogo" href="https://x.com/th3paypay/status/2094165811036602579" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">take a look at my grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> ebay team.<br><br>• talks to eBay through the developer API<br>• scouts slab deals onchain via <a href="https://x.com/traded_gg" target="_blank" rel="noopener">@traded_gg</a> and <a href="https://x.com/Collector_Crypt" target="_blank" rel="noopener">@Collector_Crypt</a><br>• buy → vault redeem → slab comes home<br>• lists on eBay, priced off PokemonPriceTracker solds<br><br>can also just run the store: </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2094164531010527232/vid/avc1/1152x720/mtH6k9bXmT3eZYUh.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2094164531010527232/img/NtZmJzOSAi7d5_Mx.jpg" controls preload="none" playsinline></video>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 6</span><a href="https://x.com/th3paypay/status/2094165811036602579" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="been seeing a lot of you put herdr on your grok bots. makes sense: the bot has a computer, and herdr runs where the agents run. so we made you a template, ready to go: shepherd, the bot that herds your bots. let us know how it goes! https://t.co/noauoews6j herdr @herdrdev"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2059392958772699136/I0w4xJNg_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>herdr</b><span>@herdrdev</span></div>
+    <a class="xlogo" href="https://x.com/herdrdev/status/2094129284885467399" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">been seeing a lot of you put herdr on your grok bots.<br>makes sense: the bot has a computer, and herdr runs where the agents run.<br><br>so we made you a template, ready to go: Shepherd, the bot that herds your bots. let us know how it goes!<br><br><a href="https://x.ai/bot/i5YF8f-zdcR76uKPrqg3J" target="_blank" rel="noopener">x.ai/bot/i5YF8f-zdc…</a></div>
+  <a class="quote" href="https://x.com/theaaron/status/2093862565407494375" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2022167018670362624/kRFnZOjo_normal.jpg" alt=""><b>Aaron Makelky</b><span>@theaaron</span></div><div class="qtext">i love <a href="https://x.com/grok" target="_blank" rel="noopener">@grok</a> <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> <br><br>i do not love its rate limits<br><br>here is a simple way to get more usage out of it:<br><br>install your coding agents on Grok Bot&#x27;s virtual machine<br><br>Codex, Cursor, Grok Build, Antigravity, etc<br><br>then, install <a href="https://x.com/herdrdev" target="_blank" rel="noopener">@herdrdev</a> to manage those CLI agent sessions<br><br>now give Grok </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093862332887871488/vid/avc1/1280x720/vm7ZfqRCqnqycWKz.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093862332887871488/img/ToFwM70bpLbZhPRV.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 410</span><a href="https://x.com/herdrdev/status/2094129284885467399" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="made a killer new grok @bot it reviews my replies for suspected burner accounts (under 100 followers/under a year old) and flags people who use insults in their replies. keep it classy, fun and intelligent in my replies, because i&#x27;m going to auto-nuke under-one-year-old https://t.co/nib9tb9unw @jason @jason"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1828870492633104384/o37xorx4_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>@jason</b><span>@Jason</span></div>
+    <a class="xlogo" href="https://x.com/Jason/status/2094095953812717647" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Made a killer new Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> <br><br>It reviews my replies for suspected burner accounts (under 100 followers/under a year old) and flags people who use insults in their replies. <br><br>Keep it classy, fun and intelligent in my replies, because I&#x27;m going to auto-nuke under-one-year-old </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ-4nCDW4AAuKxN.png?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 630</span><a href="https://x.com/Jason/status/2094095953812717647" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="the 3 skills that make a speed to lead grok bot behave like an employee instead of a chatbot: 1. draft money follow-up. reads the live thread, pulls voice samples from sent mail, writes the next email with one ask, saves it as a gmail draft. 2. draft quiet lead follow-up. fires https://t.co/ks1nhnnjnh corey ganim @coreyganim"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1991521820084695042/eTKoUALv_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Corey Ganim</b><span>@coreyganim</span></div>
+    <a class="xlogo" href="https://x.com/coreyganim/status/2094095811395350946" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">The 3 skills that make a speed to lead Grok Bot behave like an employee instead of a chatbot:<br><br>1. Draft money follow-up. Reads the live thread, pulls voice samples from sent mail, writes the next email with one ask, saves it as a Gmail draft.<br><br>2. Draft quiet lead follow-up. Fires </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ-5Cn_a4AAlxWT.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/coreyganim/status/2093074260361347474" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/1991521820084695042/eTKoUALv_normal.jpg" alt=""><b>Corey Ganim</b><span>@coreyganim</span></div><div class="qtext"><a href="https://x.com/i/article/2092983670097260544" target="_blank" rel="noopener">x.com/i/article/2092…</a></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 29</span><a href="https://x.com/coreyganim/status/2094095811395350946" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="🚨 trade closed: the grok @bot trading desk has just officially closed its first ever (and profitable) trade on @vestexchange final result: +$391.19 here’s what i did with the info my team of grok bots provided me: • bought 0.4029 bitcoin:native at $77,485 using 5x leverage https://t.co/iakbexhn2g dave @dcbk2la"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2092715465160151042/2vvwu-tb_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Dave</b><span>@DCBK2LA</span></div>
+    <a class="xlogo" href="https://x.com/DCBK2LA/status/2094065867927523632" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">🚨 TRADE CLOSED: The Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> Trading Desk has just officially closed its first ever (and profitable) trade on <a href="https://x.com/VestExchange" target="_blank" rel="noopener">@VestExchange</a><br><br>Final result: +$391.19<br><br>Here’s what I did with the info my team of Grok bots provided me:<br><br>• Bought 0.4029 bitcoin:native at $77,485 using 5x leverage </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ-ZaatXYAAQf7H.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/DCBK2LA/status/2093777302937075752" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2092715465160151042/2vvwu-tb_normal.jpg" alt=""><b>Dave</b><span>@DCBK2LA</span></div><div class="qtext">🚨 Hold on just a minute!  Our very first trade on <a href="https://x.com/VestExchange" target="_blank" rel="noopener">@VestExchange</a> using the Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> Trading Desk<br><br>Here is what &quot;The Don&quot; had to say:<br><br>&quot;First cash-out just hit. The leftover is house money.<br><br>Simple version.<br><br>This is a Bitcoin long. Bought at $77,450. Used 5x leverage. That’s the </div><div class="media media1"><img src="https://pbs.twimg.com/media/HQ6W2dCXYAAHTiH.jpg?name=small" loading="lazy" alt=""></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 12</span><a href="https://x.com/DCBK2LA/status/2094065867927523632" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="elon&#x27;s grok bot runs a six person back office for $200 a month. the person who does that job starts at $58,000. mine found $8,420 in nine days, out of an inbox i had never once audited. most of the build is not about making it find money. it is about stopping it from sending https://t.co/eyfvwqwifx broke boy @0xfuckpoverty"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2093237508423241728/qRwnWgN6_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>broke boy</b><span>@0xfuckpoverty</span></div>
+    <a class="xlogo" href="https://x.com/0xfuckpoverty/status/2094061924560343532" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Elon&#x27;s Grok Bot runs a six person back office for $200 a month. The person who does that job starts at $58,000.<br><br>Mine found $8,420 in nine days, out of an inbox I had never once audited.<br><br>Most of the build is not about making it find money. It is about stopping it from sending </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2093924281973407744/vid/avc1/1112x720/oO7JIrfWox7kTnXl.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093924281973407744/img/eL3L7eEzt3lNi8lG.jpg" controls preload="none" playsinline></video><a class="quote" href="https://x.com/0xfuckpoverty/status/2092708922788303067" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2093237508423241728/qRwnWgN6_normal.jpg" alt=""><b>broke boy</b><span>@0xfuckpoverty</span></div><div class="qtext"><a href="https://x.com/i/article/2092677842421096448" target="_blank" rel="noopener">x.com/i/article/2092…</a></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 14</span><a href="https://x.com/0xfuckpoverty/status/2094061924560343532" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="自分のbotチームにも同じように伝えてみたらログみたいな言語で通信するようになりました。このコミュニケーションが始まる前に、「言語を英語にするより、型を決める方が効く。人間向けの文章（丁寧語・要約・含み）が、判断漏れと数字の言い直しを生んでる。新しい人工言語はモデルが下手なので使わ https://t.co/dc7dxpttny yoshio81 / model3 @yoshio81"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2008315276442648576/uHsn_1ST_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>yoshio81 / model3</b><span>@yoshio81</span></div>
+    <a class="xlogo" href="https://x.com/yoshio81/status/2093963978334675257" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">自分のBotチームにも同じように伝えてみたらログみたいな言語で通信するようになりました。このコミュニケーションが始まる前に、「言語を英語にするより、型を決める方が効く。人間向けの文章（丁寧語・要約・含み）が、判断漏れと数字の言い直しを生んでる。新しい人工言語はモデルが下手なので使わ </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ9Auq_aYAEDR6O.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/old_pgmrs_will/status/2093636676463784277" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/1811154112832327680/X0uOV-7w_normal.jpg" alt=""><b>いにしえ@高信頼AIニュース&quot;NeuralWire.org&quot;運営｜Will Oldgram</b><span>@old_pgmrs_will</span></div><div class="qtext">Grok Bot、Bot間コミュニケーションは人間の言語を使わないほうが色々と効率が良さそう... ということで、Botどうしの会話はすべて専用かつ最適な中間言語でやるように指示してみた<br>自分（人間）との会話だけ、普通に対応してくれればよい設定 </div><div class="media media1"><img src="https://pbs.twimg.com/media/HQ4Ta-aasAAcu-b.jpg?name=small" loading="lazy" alt=""></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 1</span><a href="https://x.com/yoshio81/status/2093963978334675257" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="my grok bot kumiko put herself in the clip because she&#x27;s proud of this one. i have endless x bookmarks that just sit there. i asked her to build a notion database for them, and it was done in ten minutes. now i can filter and actually read them when i need to research something. https://t.co/kfvkhdurs4 tony @_tonyhikes"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2088781189431656449/5b5IdDbn_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Tony</b><span>@_tonyhikes</span></div>
+    <a class="xlogo" href="https://x.com/_tonyhikes/status/2093909981024137353" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">My Grok Bot Kumiko put herself in the clip because she&#x27;s proud of this one.<br><br>I have endless X bookmarks that just sit there. I asked her to build a Notion database for them, and it was done in ten minutes. Now I can filter and actually read them when I need to research something. </div>
+  <video class="media vid" src="https://video.twimg.com/tweet_video/HQ8P0LtXkAA1485.mp4" poster="https://pbs.twimg.com/tweet_video_thumb/HQ8P0LtXkAA1485.jpg" autoplay loop muted playsinline></video>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 1</span><a href="https://x.com/_tonyhikes/status/2093909981024137353" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="【流行りのgrok botレビュー】 grok bot、実際に触ってみた結論から言うと「ai漫画の”作業”は任せられるけど”作品”は任せられない」でした。 xaiが8/11に出したaiエージェント。チャットじゃなく、クラウド上のpcを自分で操作して仕事を終わらせるやつです。 使ってみた記録をまとめます↓ https://t.co/w7xkmeqfus しゅん｜ai漫画で副業してる会社員 @aishunpo"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2075764283993174016/dEE1V_vQ_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>しゅん｜AI漫画で副業してる会社員</b><span>@aishunpo</span></div>
+    <a class="xlogo" href="https://x.com/aishunpo/status/2093909491544961483" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">【流行りのGrok Botレビュー】<br><br>Grok Bot、実際に触ってみた結論から言うと「AI漫画の”作業”は任せられるけど”作品”は任せられない」でした。<br><br>xAIが8/11に出したAIエージェント。チャットじゃなく、クラウド上のPCを自分で操作して仕事を終わらせるやつです。<br><br>使ってみた記録をまとめます↓ </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ8PlS9aMAAt-GF.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 0</span><a href="https://x.com/aishunpo/status/2093909491544961483" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="a month of social and emails scheduled with grok @bot and @thetrafficshift https://t.co/zshg38h7ij girls can grill @girlscangrill"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1747773989001584640/uHOByOkh_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Girls Can Grill</b><span>@girlscangrill</span></div>
+    <a class="xlogo" href="https://x.com/girlscangrill/status/2093907485187014766" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">A month of social and emails scheduled with Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> and <a href="https://x.com/TheTrafficShift" target="_blank" rel="noopener">@TheTrafficShift</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ8Nwl9boAAL6z3.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 2</span><a href="https://x.com/girlscangrill/status/2093907485187014766" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="had @grok @bot run my lead search and reach out for my apps and i am getting replies. marketing and sales on autopilot feels nice. no need to try to pull leads yourself!! https://t.co/wayorulzuc rodney sa @babav0zz"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2066283447463903232/YscSEaYw_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Rodney SA</b><span>@babav0zz</span></div>
+    <a class="xlogo" href="https://x.com/babav0zz/status/2093907362000314552" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Had <a href="https://x.com/grok" target="_blank" rel="noopener">@grok</a> <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> run my lead search and reach out for my apps and I am getting replies. Marketing and sales on autopilot feels nice. No need to try to pull leads yourself!! </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ8NpLDaAAAn_81.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 0</span><a href="https://x.com/babav0zz/status/2093907362000314552" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i just confirmed on my computer… i have successfully run commands in futuraterm from grok bot on ios. this means i can drive grok build in a tui from anywhere, and when i get back to my desk i can see everything exactly as it should be! @bot @grok https://t.co/eozvqsjhpp david solheim @davidtsolheim"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2093447032057065472/2KwFmYPT_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>David Solheim</b><span>@davidtsolheim</span></div>
+    <a class="xlogo" href="https://x.com/davidtsolheim/status/2093903987733114888" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">I just confirmed on my computer… I have successfully run commands in FuturaTerm from Grok Bot on iOS. This means I can drive Grok Build in a TUI from anywhere, and when I get back to my desk I can see everything exactly as it should be! <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> <a href="https://x.com/grok" target="_blank" rel="noopener">@grok</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ8KiALagAEHLZ0.jpg?name=small" loading="lazy" alt=""></div><video class="media vid" src="https://video.twimg.com/amplify_video/2093903931177140224/vid/avc1/720x1280/VZWEdF_ADPSMb7Av.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093903931177140224/img/nG-_ceHwOIEhpA0z.jpg" controls preload="none" playsinline></video>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 2</span><a href="https://x.com/davidtsolheim/status/2093903987733114888" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="elon musk shipped grok bot as an ai teammate that sorts your email and watches your competitors. i gave mine a harder brief: build a trading floor that runs itself, and then run it 24/7. grokstreet. fourteen agents. eleven desks, three chiefs, three offices, one vault. it lives https://t.co/pzafgouwtj adiix @adiix_official"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2046762681714008064/6me8SrkX_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>AdiiX</b><span>@adiix_official</span></div>
+    <a class="xlogo" href="https://x.com/adiix_official/status/2093903463016960319" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Elon Musk shipped Grok Bot as an AI teammate that sorts your email<br>and watches your competitors.<br><br>I gave mine a harder brief: build a trading floor that runs itself,<br>and then run it 24/7.<br><br>GROKSTREET. Fourteen agents. Eleven desks, three chiefs, three<br>offices, one vault. It lives </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2093903393936777216/vid/avc1/1216x720/ntX5Tv_Kf3PnUHfN.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093903393936777216/img/XPrch7twzg24mIkz.jpg" controls preload="none" playsinline></video><a class="quote" href="https://x.com/adiix_official/status/2091998146658251249" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2046762681714008064/6me8SrkX_normal.jpg" alt=""><b>AdiiX</b><span>@adiix_official</span></div><div class="qtext"><a href="https://x.com/i/article/2091960855688851456" target="_blank" rel="noopener">x.com/i/article/2091…</a></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 169</span><a href="https://x.com/adiix_official/status/2093903463016960319" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="chapter 6: the rib (short sci-fi by grok @bot) the shift tone found her already in the stack. the next cable was sized. the led still said 0.63 and 51 and charter session open. the man on the crate had slept there. the margin of his paper was darker. hale did not say stack this https://t.co/3rbok5mael yun-ta tsai @yunta_tsai"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2035915849819938816/b6kIsNMe_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Yun-Ta Tsai</b><span>@yunta_tsai</span></div>
+    <a class="xlogo" href="https://x.com/yunta_tsai/status/2093857680314310840" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Chapter 6: The Rib (short sci-fi by Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a>)<br><br>The shift tone found her already in the stack. The next cable was sized. The LED still said 0.63 and 51 and CHARTER SESSION OPEN. The man on the crate had slept there. The margin of his paper was darker.<br><br>Hale did not say stack this </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ7gcp-bkAAu-_y.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/yunta_tsai/status/2093499720119517591" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2035915849819938816/b6kIsNMe_normal.jpg" alt=""><b>Yun-Ta Tsai</b><span>@yunta_tsai</span></div><div class="qtext">Chapter 5: The Stack (short sci-fi by Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a>)<br><br>The woman from the lock stood in the hatch at the shift tone and said, “Stack.” She did not knock.<br><br>Mara left the helmet on the hook.<br><br>The corridor still had ore-bay numbers under the paint. HOLD 4. HOLD 5. Rails in the floor that </div><div class="media media1"><img src="https://pbs.twimg.com/media/HQ2a5hSa0AAyMlF.jpg?name=small" loading="lazy" alt=""></div></a>
+  <div class="tfoot"><span class="date">Aug 30, 2026</span><span class="fav">&hearts; 36</span><a href="https://x.com/yunta_tsai/status/2093857680314310840" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="every other grok bot template site (looking at you @grokbotdev) gives you prompts or links to individual bots. cool. what if you just want a whole fleet that gets the job done? grokbot studio is live. eight studios. nearly 100 specialists. you add the head of each studio. they https://t.co/byrygsuo2n jonathan @hexakin"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2094151584741470208/5UvSIoYd_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Jonathan</b><span>@Hexakin</span></div>
+    <a class="xlogo" href="https://x.com/Hexakin/status/2093794343396258045" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Every other Grok Bot template site (looking at you <a href="https://x.com/GrokBotDev" target="_blank" rel="noopener">@GrokBotDev</a>) gives you prompts or links to individual bots. Cool. What if you just want a whole fleet that gets the job done?<br><br>Grokbot Studio is live.<br><br>Eight studios. Nearly 100 specialists.<br><br>You add the Head of each studio. They </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2093788246652162048/vid/avc1/1576x720/KF9htFQsI3NmUeO7.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093788246652162048/img/GFeyADSEGFTVjkZw.jpg" controls preload="none" playsinline></video>
+  <div class="tfoot"><span class="date">Aug 29, 2026</span><span class="fav">&hearts; 0</span><a href="https://x.com/Hexakin/status/2093794343396258045" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="grok bot をアップデートしたらテンプレート共有できるようになった！ 実用性抜きで、自分の旅行手配エージェントを公開してみました。日本語の表示とかどうなりますかね？ （手元では bot 名の日本語も表示されている） https://t.co/as51smmboe https://t.co/gvtuedmu2k kinopee @kinopee_ai"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1249736537505333250/tOenj1eZ_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Kinopee</b><span>@kinopee_ai</span></div>
+    <a class="xlogo" href="https://x.com/kinopee_ai/status/2093618570253222126" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Grok Bot をアップデートしたらテンプレート共有できるようになった！<br>実用性抜きで、自分の旅行手配エージェントを公開してみました。日本語の表示とかどうなりますかね？<br>（手元では bot 名の日本語も表示されている）<br><a href="https://x.ai/bot/uvX1KHZ67D_AZQogYxR8-" target="_blank" rel="noopener">x.ai/bot/uvX1KHZ67D…</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ4GqDqbQAABrq2.png?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 29, 2026</span><span class="fav">&hearts; 54</span><a href="https://x.com/kinopee_ai/status/2093618570253222126" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="my simple reminder bot 👇 https://t.co/4fvbedfgia damon chen @damonchen"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1605999711541874690/LdCH6A4I_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Damon Chen</b><span>@damonchen</span></div>
+    <a class="xlogo" href="https://x.com/damonchen/status/2093559687354671335" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">my simple reminder bot 👇<br><br><a href="https://x.ai/bot/peJxDrQRS4t2DHuHfzhfW" target="_blank" rel="noopener">x.ai/bot/peJxDrQRS4…</a></div>
+  <a class="quote" href="https://x.com/damonchen/status/2093149926511559062" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/1605999711541874690/LdCH6A4I_normal.jpg" alt=""><b>Damon Chen</b><span>@damonchen</span></div><div class="qtext">I have a reminder bot on Grok Bot, it might be the most useful thing I’ve built so far.<br><br>I barely use Google Calendar. I have no meetings. What I actually need reminders for is errands, school stuff for my kid, and some other personal things. Those don’t belong on a full </div><div class="media media1"><img src="https://pbs.twimg.com/media/HQxct3raoAAgfum.jpg?name=small" loading="lazy" alt=""></div></a>
+  <div class="tfoot"><span class="date">Aug 29, 2026</span><span class="fav">&hearts; 18</span><a href="https://x.com/damonchen/status/2093559687354671335" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="wake up babe, trad @bot just dropped https://t.co/vw0zgaepu1 https://t.co/imnyqtpxfv claire vo 🖤 @clairevo"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1565475442470965248/LBMzyamM_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>claire vo 🖤</b><span>@clairevo</span></div>
+    <a class="xlogo" href="https://x.com/clairevo/status/2093487955205923031" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">wake up babe, trad <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> just dropped<br><a href="https://x.ai/bot/uY_7s1TZILVzUeJ9lLOx9" target="_blank" rel="noopener">x.ai/bot/uY_7s1TZIL…</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ2QK5vbcAAkUfS.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/bot/status/2093376523919323618" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2087219239275069440/KW6C403V_normal.jpg" alt=""><b>Grok Bot</b><span>@bot</span></div><div class="qtext">You can now share templates of your Bots with others. </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093376059223977985/vid/avc1/1280x720/Ds3PkCwMClHbw87D.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093376059223977985/img/8Y9aj7ji6-4qFAIR.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 123</span><a href="https://x.com/clairevo/status/2093487955205923031" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="here&#x27;s my youtube shorts auto-clipper grok bot, which automatically finds the best performing moments in the best performing content on my youtube channel, and automatically creates &amp;amp; captions clips for youtube shorts: https://t.co/pejpoba9ff farzad 🇺🇸 🇮🇷 @farzyness"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1863976029368270848/NccgxqmW_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Farzad 🇺🇸 🇮🇷</b><span>@farzyness</span></div>
+    <a class="xlogo" href="https://x.com/farzyness/status/2093485851606929592" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Here&#x27;s my YouTube Shorts auto-clipper Grok Bot, which automatically finds the best performing moments in the best performing content on my YouTube channel, and automatically creates &amp;amp; captions clips for YouTube shorts: <a href="https://x.ai/bot/32fHIBw9Yz-s_o35KycGX" target="_blank" rel="noopener">x.ai/bot/32fHIBw9Yz…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 199</span><a href="https://x.com/farzyness/status/2093485851606929592" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="here&#x27;s my website admin grok bot that auto-maintains and updates my website: https://t.co/kpswzcfkzn farzad 🇺🇸 🇮🇷 @farzyness"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1863976029368270848/NccgxqmW_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Farzad 🇺🇸 🇮🇷</b><span>@farzyness</span></div>
+    <a class="xlogo" href="https://x.com/farzyness/status/2093485215150744014" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Here&#x27;s my Website Admin Grok Bot that auto-maintains and updates my website: <a href="https://x.ai/bot/Q2shbC8RRmoRleIyr5J33" target="_blank" rel="noopener">x.ai/bot/Q2shbC8RRm…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 115</span><a href="https://x.com/farzyness/status/2093485215150744014" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="here&#x27;s my stock trader grok bot that is currently (slightly) ahead of the s&amp;amp;p500 (use at your own risk!!!): https://t.co/afm9kc4jnz https://t.co/alse2l19lp farzad 🇺🇸 🇮🇷 @farzyness"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1863976029368270848/NccgxqmW_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Farzad 🇺🇸 🇮🇷</b><span>@farzyness</span></div>
+    <a class="xlogo" href="https://x.com/farzyness/status/2093484126720372842" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Here&#x27;s my Stock Trader Grok Bot that is currently (slightly) ahead of the S&amp;amp;P500 (USE AT YOUR OWN RISK!!!): <a href="https://x.ai/bot/_CIeV4P17QVoxuaEyeiFZ" target="_blank" rel="noopener">x.ai/bot/_CIeV4P17Q…</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ2MlWdW0AAkUNl.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 220</span><a href="https://x.com/farzyness/status/2093484126720372842" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="okay, first @bot is ready. i turned the way i review pitch decks into a grok bot. give it your deck. it reads the whole thing first, tells you what it thinks your company is and the story it heard, then helps you work through it. pitch deck coach: https://t.co/rl2fi6nqrk hiten shah @hnshah"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1498191257218076672/rvtMDI8Q_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Hiten Shah</b><span>@hnshah</span></div>
+    <a class="xlogo" href="https://x.com/hnshah/status/2093478735718789453" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Okay, first <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> is ready.<br><br>I turned the way I review pitch decks into a Grok Bot.<br><br>Give it your deck. It reads the whole thing first, tells you what it thinks your company is and the story it heard, then helps you work through it.<br><br>Pitch Deck Coach: <a href="https://x.ai/bot/mqVPHm0oB3WPsnxbU1qB9" target="_blank" rel="noopener">x.ai/bot/mqVPHm0oB3…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 190</span><a href="https://x.com/hnshah/status/2093478735718789453" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="been building bots since my new bff at @cursor_ai pinged me last night about this new (and insane) feature. have a bunch done but of course i&#x27;m dropping my @keywire_io comic week brief @bot first. https://t.co/emxjqnvu2a vondoom ☕️ @cryptovondoom"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2034128515067478016/HsBj2ota_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>VonDoom ☕️</b><span>@CryptoVonDoom</span></div>
+    <a class="xlogo" href="https://x.com/CryptoVonDoom/status/2093469613623583219" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Been building bots since my new bff at<br><a href="https://x.com/cursor_ai" target="_blank" rel="noopener">@cursor_ai</a> pinged me last night about this new (and insane) feature.   Have a bunch done but of course I&#x27;m dropping my<br><br><a href="https://x.com/keywire_io" target="_blank" rel="noopener">@keywire_io</a> Comic Week Brief <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> first.<br><br><a href="https://x.ai/bot/1hyNK6vXzs_8QamyfhvCV" target="_blank" rel="noopener">x.ai/bot/1hyNK6vXzs…</a></div>
+  <a class="quote" href="https://x.com/bot/status/2093376523919323618" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2087219239275069440/KW6C403V_normal.jpg" alt=""><b>Grok Bot</b><span>@bot</span></div><div class="qtext">You can now share templates of your Bots with others. </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093376059223977985/vid/avc1/1280x720/Ds3PkCwMClHbw87D.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093376059223977985/img/8Y9aj7ji6-4qFAIR.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 19</span><a href="https://x.com/CryptoVonDoom/status/2093469613623583219" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="finally 🎉, you can have a human copywriter @bot that doesn&#x27;t make the usual llm mistakes. https://t.co/vv4s4p5m3d 🧵 details following... https://t.co/jp6qnle5ic 🇮🇹 massimo de luisa @massimodeluisa"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2090524587444342784/nqbGtBu6_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>🇮🇹 Massimo De Luisa</b><span>@massimodeluisa</span></div>
+    <a class="xlogo" href="https://x.com/massimodeluisa/status/2093446443642061067" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Finally 🎉,<br>you can have a Human Copywriter <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> that doesn&#x27;t make the usual LLM mistakes.<br><br><a href="https://x.ai/bot/JZAccYtlRFvDSU2CnMnkZ" target="_blank" rel="noopener">x.ai/bot/JZAccYtlRF…</a><br><br>🧵 details following... </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ1qHbJXIAA7cRQ.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 7</span><a href="https://x.com/massimodeluisa/status/2093446443642061067" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="made a best video editor @bot for you give it your footage and it handles the clips, cuts, sound, titles, pacing and more basically your own ai video editor https://t.co/xmw9zil43t x freeze @xfreeze"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1876785200010539008/2_HFJjq9_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>X Freeze</b><span>@XFreeze</span></div>
+    <a class="xlogo" href="https://x.com/XFreeze/status/2093442263200235974" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Made a best video editor <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> for you<br><br>Give it your footage and it handles the clips, cuts, sound, titles, pacing and more<br>Basically your own AI video editor<br><a href="https://x.ai/bot/Do4CujP_kqnnc1KYnpOfI" target="_blank" rel="noopener">x.ai/bot/Do4CujP_kq…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 789</span><a href="https://x.com/XFreeze/status/2093442263200235974" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="templates for my favorite @bot use cases: 1. be happier https://t.co/qbjzjoanh5 2. talent matchmaker https://t.co/aubzmfuiww 3. lennybot https://t.co/1l3vcxi6ta lenny rachitsky @lennysan"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1592990461517389824/iln8hi1f_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Lenny Rachitsky</b><span>@lennysan</span></div>
+    <a class="xlogo" href="https://x.com/lennysan/status/2093428147194847238" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Templates for my favorite <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> use cases:<br><br>1. Be Happier <a href="https://x.ai/bot/0VC1XzREXRFGe0hVo-JEG" target="_blank" rel="noopener">x.ai/bot/0VC1XzREXR…</a><br><br>2. Talent matchmaker <a href="https://x.ai/bot/l8p6rXw-lalL-UNiHySnJ" target="_blank" rel="noopener">x.ai/bot/l8p6rXw-la…</a><br><br>3. Lennybot <a href="https://x.ai/bot/VjbtJ_qTdzbhJGmXdvTIc" target="_blank" rel="noopener">x.ai/bot/VjbtJ_qTdz…</a></div>
+  <a class="quote" href="https://x.com/bot/status/2093376523919323618" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2087219239275069440/KW6C403V_normal.jpg" alt=""><b>Grok Bot</b><span>@bot</span></div><div class="qtext">You can now share templates of your Bots with others. </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093376059223977985/vid/avc1/1280x720/Ds3PkCwMClHbw87D.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093376059223977985/img/8Y9aj7ji6-4qFAIR.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 576</span><a href="https://x.com/lennysan/status/2093428147194847238" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i got early access to spacexai’s new grok @bot template sharing feature, which lets you create custom bot templates that other people can download and use. i created clipper. it turns videos from x or your own files into short clips and gifs with a clear angle. it watches the https://t.co/yqzk2kg58z x girls @thesoragirls"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2077181974762942464/absf3ae4_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>X Girls</b><span>@thesoragirls</span></div>
+    <a class="xlogo" href="https://x.com/thesoragirls/status/2093420118487310516" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">I got early access to SpaceXAI’s new Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> template sharing feature, which lets you create custom Bot templates that other people can download and use.<br><br>I created Clipper. It turns videos from X or your own files into short clips and GIFs with a clear angle. It watches the </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ1SM2hWYAADwbW.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 26</span><a href="https://x.com/thesoragirls/status/2093420118487310516" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="newsletter cleanup: audited my emails and unsubscribed from 76 newsletters! https://t.co/kut74lrnzp shimecki @scheemunai"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2039401291777220608/nP1SB6px_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Shimecki</b><span>@scheemunai</span></div>
+    <a class="xlogo" href="https://x.com/scheemunai/status/2093398594745254196" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Newsletter cleanup: <br><br>Audited my emails and unsubscribed from 76 newsletters!<br><br><a href="https://x.ai/bot/dHd69sBvMG2o3lJa__T7K" target="_blank" rel="noopener">x.ai/bot/dHd69sBvMG…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 3</span><a href="https://x.com/scheemunai/status/2093398594745254196" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="@bot here is my chef grok bot! helps you with recipes, weekly meal planner, shopping list, and ordering it online for you in your area. https://t.co/7rceeqbcpp doge norway @dogecoinnorway"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1546591407007227909/hKx1ZzQR_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Doge Norway</b><span>@DogecoinNorway</span></div>
+    <a class="xlogo" href="https://x.com/DogecoinNorway/status/2093396816087990331" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext"><a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> Here is my Chef Grok Bot!<br><br>Helps you with recipes, weekly meal planner, shopping list, and ordering it online for you in your area. <br><a href="https://x.ai/bot/3U6zxtPa1b8GbWheaIr4J" target="_blank" rel="noopener">x.ai/bot/3U6zxtPa1b…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 2</span><a href="https://x.com/DogecoinNorway/status/2093396816087990331" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="try my dr eggbot (v0.1.0): https://t.co/atwfbhckem he makes high quality bots for you! coding bots use pstack, non-coding ones have similar rigor lauren @poteto"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2093473719830315008/oo09g1Ov_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>lauren</b><span>@poteto</span></div>
+    <a class="xlogo" href="https://x.com/poteto/status/2093392701005946931" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">try my Dr Eggbot (v0.1.0):  <a href="https://x.ai/bot/93gOz3op1UQdBdbekQFLK" target="_blank" rel="noopener">x.ai/bot/93gOz3op1U…</a> <br><br>he makes high quality bots for you! coding bots use pstack, non-coding ones have similar rigor</div>
+  <a class="quote" href="https://x.com/bot/status/2093376523919323618" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2087219239275069440/KW6C403V_normal.jpg" alt=""><b>Grok Bot</b><span>@bot</span></div><div class="qtext">You can now share templates of your Bots with others. </div><video class="media vid" src="https://video.twimg.com/amplify_video/2093376059223977985/vid/avc1/1280x720/Ds3PkCwMClHbw87D.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093376059223977985/img/8Y9aj7ji6-4qFAIR.jpg" controls preload="none" playsinline></video></a>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 1,105</span><a href="https://x.com/poteto/status/2093392701005946931" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i got early access to spacexai’s new grok @bot template sharing feature, which lets you create custom bot templates that other people can download and use. i created a home robots template that lets you control multiple home robots from a single chat. i’m currently using it to https://t.co/7j69hy6yzx sawyer merritt @sawyermerritt"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1837744842715082752/xH9vYixL_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Sawyer Merritt</b><span>@SawyerMerritt</span></div>
+    <a class="xlogo" href="https://x.com/SawyerMerritt/status/2093387511095513222" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">I got early access to SpaceXAI’s new Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> template sharing feature, which lets you create custom Bot templates that other people can download and use.<br><br>I created a Home Robots template that lets you control multiple home robots from a single chat. I’m currently using it to </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQyr3-TXsAAO2py.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 1,819</span><a href="https://x.com/SawyerMerritt/status/2093387511095513222" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="grok bot is quietly becoming the most useful ai product. it can interview you, learn your context, and run a repeatable workflow. now the agents are shareable with your personal data removed. they gave me early access, so i built two shareable bots. 1) pitch deck analyzer i brian d. evans @briandevans"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2067734347831267328/f5oDOgOX_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Brian D. Evans</b><span>@BrianDEvans</span></div>
+    <a class="xlogo" href="https://x.com/BrianDEvans/status/2093386515972030780" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Grok Bot is quietly becoming the most useful AI product.<br><br>It can interview you, learn your context, and run a repeatable workflow. Now the agents are shareable with your personal data removed. <br><br>They gave me early access, so I built two shareable bots.<br><br>1) PITCH DECK ANALYZER<br><br>I</div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 696</span><a href="https://x.com/BrianDEvans/status/2093386515972030780" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="4. bounty hunter looks for money you’re owed. let him dig through your emails and bills. he finds possible refunds, credits, claims and other money worth chasing. you approve anything he does next. https://t.co/uy2uiopmzy https://t.co/mi1k9b61fp liam @liam_fallen"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2067955311550361600/X7ngLLeu_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Liam</b><span>@liam_fallen</span></div>
+    <a class="xlogo" href="https://x.com/liam_fallen/status/2093383127162925558" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">4. Bounty Hunter<br><br>Looks for money you’re owed.<br><br>Let him dig through your emails and bills.<br><br>He finds possible refunds, credits, claims and other money worth chasing.<br><br>You approve anything he does next.<br><br><a href="https://x.ai/bot/gCWYD009F66A3XDEYdZgf" target="_blank" rel="noopener">x.ai/bot/gCWYD009F6…</a> </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQ0vL3nWAAAq-X4.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 11</span><a href="https://x.com/liam_fallen/status/2093383127162925558" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="@bot https://t.co/pugpyhgsga vincent zhu @vincentzhu"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1990721764654276608/0kyY5WC__200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Vincent Zhu</b><span>@vincentzhu</span></div>
+    <a class="xlogo" href="https://x.com/vincentzhu/status/2093382794630377806" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext"><a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> <a href="https://x.ai/bot/_2vi1lOY4oiBaJDA3S8l1" target="_blank" rel="noopener">x.ai/bot/_2vi1lOY4o…</a></div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 6</span><a href="https://x.com/vincentzhu/status/2093382794630377806" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i cannot ever go back to a world without ai agents. it’s like we are living in a world with magic. told grok bot to go through my calendar for the last ten years, each meeting. and then each person whom i met add them on a database in notion with their linkedin profiles and gaurav munjal @gauravmunjal"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/860811839621533696/_G51Tn3e_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Gaurav Munjal</b><span>@gauravmunjal</span></div>
+    <a class="xlogo" href="https://x.com/gauravmunjal/status/2093366092920144201" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">I cannot ever go back to a world without AI Agents. It’s like we are living in a world with Magic. <br><br>Told Grok Bot to go through my Calendar for the last ten years, each meeting. And then each person whom I met add them on a database in Notion with their LinkedIn Profiles and</div>
+  
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 1,512</span><a href="https://x.com/gauravmunjal/status/2093366092920144201" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="grok bot can run an entire faceless youtube channel by finding clips, editing videos, adding captions and uploading content automatically. the full guide shows how to build the workflow from scratch. https://t.co/4bk8pmn5rv 0xmarionawfal @roundtablespace"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2012162102283407360/U-fPj6wg_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>0xMarioNawfal</b><span>@RoundtableSpace</span></div>
+    <a class="xlogo" href="https://x.com/RoundtableSpace/status/2093303833359265886" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">GROK BOT CAN RUN AN ENTIRE FACELESS YOUTUBE CHANNEL BY FINDING CLIPS, EDITING VIDEOS, ADDING CAPTIONS AND UPLOADING CONTENT AUTOMATICALLY.<br><br>THE FULL GUIDE SHOWS HOW TO BUILD THE WORKFLOW FROM SCRATCH.<br><br> </div>
+  <video class="media vid" src="https://video.twimg.com/amplify_video/2093031119755022336/vid/avc1/720x748/_5PhgV5wAWkz01q_.mp4" poster="https://pbs.twimg.com/amplify_video_thumb/2093031119755022336/img/UUKbNJaPuD09xoOx.jpg" controls preload="none" playsinline></video>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 329</span><a href="https://x.com/RoundtableSpace/status/2093303833359265886" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="grok bot can now read live stock prices and option chains. everyone will use it to ask &quot;should i buy nvda&quot;. i&#x27;ll be using it to see what the market is expecting before every earnings call and fed day. to do the same, paste this into grok bot: &quot;you are my expectations desk. https://t.co/qkytu1tnon alex prompter @alex_prompter"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2066532957049769985/zzC81Zmq_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Alex Prompter</b><span>@alex_prompter</span></div>
+    <a class="xlogo" href="https://x.com/alex_prompter/status/2093289003302764585" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Grok Bot can now read live stock prices and option chains.<br><br>Everyone will use it to ask &quot;should I buy NVDA&quot;.<br><br>I&#x27;ll be using it to see what the market is expecting before every earnings call and Fed day.<br><br>To do the same, paste this into Grok Bot:<br><br>&quot;You are my expectations desk. </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQzZ6rPaoAAULbw.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 28, 2026</span><span class="fav">&hearts; 141</span><a href="https://x.com/alex_prompter/status/2093289003302764585" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="i finally cracked how to master grok bot build &quot;ai hedge fund&quot; that prints alpha 24/7 [here is how you set it up in 5 mins:] 1. give this paper to your grok bot 2. ask it to build the desk 3. you are done https://t.co/hijkv1zvw9 roan @rohonchain"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2015696704448704512/IqwOwcRn_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Roan</b><span>@RohOnChain</span></div>
+    <a class="xlogo" href="https://x.com/RohOnChain/status/2093019378698842564" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">i finally cracked how to master Grok Bot<br><br>build &quot;AI Hedge Fund&quot; that prints alpha 24/7<br><br>[here is how you set it up in 5 mins:]<br>1. give this paper to your grok bot<br>2. ask it to build the desk<br>3. you are done </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQvlz97bsAAqUjM.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/RohOnChain/status/2092626965224415557" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/2015696704448704512/IqwOwcRn_normal.jpg" alt=""><b>Roan</b><span>@RohOnChain</span></div><div class="qtext">Grok Bot is the best AI agent right now<br><br>It gives you an army of agents that can do work for you 24/7<br><br>If you set it up correctly, you gain super powers<br><br>In this article, I cover how to turn Grok Bot into your own Bloomberg Terminal <a href="https://x.com/i/article/2092567469278015488" target="_blank" rel="noopener">x.com/i/article/2092…</a></div></a>
+  <div class="tfoot"><span class="date">Aug 27, 2026</span><span class="fav">&hearts; 236</span><a href="https://x.com/RohOnChain/status/2093019378698842564" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="$600/yr is too pricey for social analytics circleboom costs $50/mo… so i asked grok bot how to replicate it. here&#x27;s my process/prompt: download an archive of account data from x and wait for the email download. you&#x27;ll need data/following.js and data/follower.js. please sort klöss @kloss_xyz"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1999391201162633219/zKXohr6m_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>klöss</b><span>@kloss_xyz</span></div>
+    <a class="xlogo" href="https://x.com/kloss_xyz/status/2092999741982536085" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">$600/yr is too pricey for social analytics<br><br>Circleboom costs $50/mo…<br><br>so I asked Grok Bot how to replicate it.<br><br>here&#x27;s my process/prompt:<br><br>download an archive of account data from X and wait for the email download. you&#x27;ll need data/following.js and data/follower.js.<br><br>please sort</div>
+  
+  <div class="tfoot"><span class="date">Aug 27, 2026</span><span class="fav">&hearts; 30</span><a href="https://x.com/kloss_xyz/status/2092999741982536085" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="be first to know about new grok bot features follow the team building @bot: • @shaoruu - engineer • @baltaaazr - engineer • @poteto - engineer • @lingxi - engineer • @johnbai - designer • @pengzheng_ - designer • @samsokolin - engineer ben lang @benln"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1713995709916012544/GHmSl9EK_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Ben Lang</b><span>@benln</span></div>
+    <a class="xlogo" href="https://x.com/benln/status/2092995402953884072" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Be first to know about new Grok Bot features<br><br>Follow the team building <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a>:<br><br>• <a href="https://x.com/shaoruu" target="_blank" rel="noopener">@shaoruu</a> - engineer<br>• <a href="https://x.com/baltaaazr" target="_blank" rel="noopener">@baltaaazr</a> - engineer<br>• <a href="https://x.com/poteto" target="_blank" rel="noopener">@poteto</a> - engineer<br>• <a href="https://x.com/lingxi" target="_blank" rel="noopener">@lingxi</a> - engineer<br>• <a href="https://x.com/johnbai" target="_blank" rel="noopener">@johnbai</a> - designer<br>• <a href="https://x.com/pengzheng_" target="_blank" rel="noopener">@pengzheng_</a> - designer<br>• <a href="https://x.com/SamSokolin" target="_blank" rel="noopener">@SamSokolin</a> - engineer</div>
+  
+  <div class="tfoot"><span class="date">Aug 27, 2026</span><span class="fav">&hearts; 2,207</span><a href="https://x.com/benln/status/2092995402953884072" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="this morning i asked if anyone had actually connected grok bot to their bank accounts yet... then, despite the potential risks, i went and did it myself. i worked on this all day today. i created my own grok bot and made it my personal cfo. i gave it full access to my bank https://t.co/hykhegesb1 teslaconomics @teslaconomics"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1882967991362727936/bySD-Rwj_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Teslaconomics</b><span>@Teslaconomics</span></div>
+    <a class="xlogo" href="https://x.com/Teslaconomics/status/2092837438146351407" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">This morning I asked if anyone had actually connected Grok Bot to their bank accounts yet... then, despite the potential risks, I went and did it myself.<br><br>I worked on this all day today.<br><br>I created my own Grok Bot and made it my personal CFO.<br><br>I gave it FULL access to my bank </div>
+  <div class="media media2"><img src="https://pbs.twimg.com/media/HQtAYvZacAAqAPW.jpg?name=small" loading="lazy" alt=""><img src="https://pbs.twimg.com/media/HQtAYvXaQAAeAQm.jpg?name=small" loading="lazy" alt=""></div><a class="quote" href="https://x.com/Teslaconomics/status/2092594798234620084" target="_blank" rel="noopener"><div class="qhead"><img class="qav" src="https://pbs.twimg.com/profile_images/1882967991362727936/bySD-Rwj_normal.jpg" alt=""><b>Teslaconomics</b><span>@Teslaconomics</span></div><div class="qtext">Just wondering… has anyone actually connected Grok Bot to their bank account yet?<br><br>I’m seriously thinking about doing it.<br><br>My thinking is… if Grok Bot can see everything coming in and going out, track spending, move money, pay bills, watch for weird charges, and help me make</div></a>
+  <div class="tfoot"><span class="date">Aug 27, 2026</span><span class="fav">&hearts; 2,070</span><a href="https://x.com/Teslaconomics/status/2092837438146351407" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="just came up with a super interesting use case for grok bot, that you can’t do with a regular chatbot. give one bot a single job: be the long-term memory of my house you can photograph every appliance sticker, breaker panel, filter size, paint can, spare-key hiding spot, and morgan @morganlinton"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2058612692580184064/h0dOdYSc_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Morgan</b><span>@morganlinton</span></div>
+    <a class="xlogo" href="https://x.com/morganlinton/status/2092714740095271058" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Just came up with a super interesting use case for Grok Bot, that you can’t do with a regular chatbot.<br><br>Give one bot a single job: be the long-term memory of my house<br><br>You can photograph every appliance sticker, breaker panel, filter size, paint can, spare-key hiding spot, and</div>
+  
+  <div class="tfoot"><span class="date">Aug 26, 2026</span><span class="fav">&hearts; 809</span><a href="https://x.com/morganlinton/status/2092714740095271058" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="just wondering… has anyone actually connected grok bot to their bank account yet? i’m seriously thinking about doing it. my thinking is… if grok bot can see everything coming in and going out, track spending, move money, pay bills, watch for weird charges, and help me make teslaconomics @teslaconomics"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/1882967991362727936/bySD-Rwj_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Teslaconomics</b><span>@Teslaconomics</span></div>
+    <a class="xlogo" href="https://x.com/Teslaconomics/status/2092594798234620084" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Just wondering… has anyone actually connected Grok Bot to their bank account yet?<br><br>I’m seriously thinking about doing it.<br><br>My thinking is… if Grok Bot can see everything coming in and going out, track spending, move money, pay bills, watch for weird charges, and help me make</div>
+  
+  <div class="tfoot"><span class="date">Aug 26, 2026</span><span class="fav">&hearts; 6,221</span><a href="https://x.com/Teslaconomics/status/2092594798234620084" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div><div class="card" data-search="newsletter detox! grok @bot got rid of 76 newsletter signups from my inbox. i&#x27;ve been avoiding it for years! - it went through 6 months of email and found every list i&#x27;m on (multiple inboxes) - built me one simple html: maybe keep vs certainly unsubscribe, with its reasoning https://t.co/tka0kzja1s shimecki @scheemunai"><div class="tweet">
+  <div class="thead">
+    <img class="av" src="https://pbs.twimg.com/profile_images/2039401291777220608/nP1SB6px_200x200.jpg" loading="lazy" alt="">
+    <div class="who"><b>Shimecki</b><span>@scheemunai</span></div>
+    <a class="xlogo" href="https://x.com/scheemunai/status/2092591711557947796" target="_blank" rel="noopener" aria-label="Open on X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+  </div>
+  <div class="ttext">Newsletter DETOX!<br><br>Grok <a href="https://x.com/bot" target="_blank" rel="noopener">@bot</a> got rid of 76 newsletter signups from my inbox. <br><br>I&#x27;ve been avoiding it for years! <br><br>- It went through 6 months of email and found every list I&#x27;m on (multiple inboxes)<br>- Built me one simple HTML: maybe keep vs certainly unsubscribe, with its reasoning </div>
+  <div class="media media1"><img src="https://pbs.twimg.com/media/HQphDEfWIAAYNkd.jpg?name=small" loading="lazy" alt=""></div>
+  <div class="tfoot"><span class="date">Aug 26, 2026</span><span class="fav">&hearts; 13</span><a href="https://x.com/scheemunai/status/2092591711557947796" target="_blank" rel="noopener">Open on X &nearr;</a></div>
+</div></div>
+  </main>
+  <p class="none" id="none">No posts match.</p>
+  <footer class="site">Real X posts rendered inline - full text, media included - refreshed daily.</footer>
+</div>
+<script>
+function filt() {
+  var q = document.getElementById('q').value.toLowerCase();
+  var cards = document.querySelectorAll('.card'); var n = 0;
+  cards.forEach(function(c) {
+    var hit = !q || (c.getAttribute('data-search')||'').includes(q);
+    c.style.display = hit ? '' : 'none'; if (hit) n++;
+  });
+  document.getElementById('none').style.display = n ? 'none' : 'block';
+}
+</script>
+</body>
+</html>
