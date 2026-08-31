@@ -16,6 +16,13 @@ while read -r u; do
   id=$(echo "$u" | grep -oE '[0-9]+$')
   [ -f "/tmp/synd/$id.json" ] || python3 "$D/fetch_synd.py" "$id" || true
 done < /tmp/urls.txt
+mkdir -p /tmp/fx
+for f in /tmp/synd/*.json; do
+  id=$(basename "$f" .json)
+  if grep -q '"note_tweet"' "$f" && [ ! -f "/tmp/fx/$id.json" ]; then
+    python3 "$D/fetch_fx.py" "$id" || true
+  fi
+done
 python3 "$D/build_wall.py"
 cp /downloads/grokbot-wall.html /tmp/site/index.html
 SHA=$(sha1sum /tmp/site/index.html | cut -d' ' -f1); SIZE=$(wc -c < /tmp/site/index.html)
