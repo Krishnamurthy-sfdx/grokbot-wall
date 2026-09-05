@@ -5,7 +5,8 @@ try:
     d = json.loads(out)
     t = d.get('tweet') or {}
     if not t.get('text'): sys.exit(1)
-    os.makedirs('/tmp/fx', exist_ok=True)
-    json.dump(t, open(f'/tmp/fx/{tid}.json','w'))
+    CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache', 'fx')
+    os.makedirs(CACHE, exist_ok=True)
+    json.dump(t, open(os.path.join(CACHE, f'{tid}.json'),'w'))
 except Exception:
     sys.exit(1)

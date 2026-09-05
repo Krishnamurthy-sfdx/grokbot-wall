@@ -1,8 +1,15 @@
 import json, re, html, glob, os
 from datetime import datetime, timezone
 
+CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache')
+
 def parse_oembed(path):
-    d = json.load(open(path))
+    try:
+        d = json.load(open(path))
+        if "html" not in d or "url" not in d:
+            return None
+    except Exception:
+        return None
     h = d["html"]
     m = re.search(r'<p lang="(?P<lang>[^"]*)"', h)
     lang = m.group("lang") if m else "en"
@@ -115,7 +122,7 @@ def card_from_synd(s, fallback):
     body = link_entities(s.get('text',''), s.get('entities'))
     long_post = ('note_tweet' in s) and (s.get('display_text_range') or [0,0])[1] >= 280
     fx_text = None
-    fxp = f'/tmp/fx/{s.get("id_str", fallback["id"])}.json'
+    fxp = f'{CACHE}/fx/{s.get("id_str", fallback["id"])}.json'
     if os.path.exists(fxp):
         fxt = html.unescape(json.load(open(fxp)).get('text',''))
         synd_visible = len(re.sub(r'https?://t\.co/\w+\s*$', '', s.get('text','')).strip())
@@ -160,7 +167,7 @@ def card_from_oembed(p):
   <div class="tfoot"><span class="date">{esc(date)}</span><a href="{esc(p["url"])}" target="_blank" rel="noopener">Open on X &nearr;</a></div>
 </div>'''
 
-posts = [parse_oembed(f) for f in glob.glob("/tmp/oembed/*.json")]
+posts = [p for p in (parse_oembed(f) for f in glob.glob(f"{CACHE}/oembed/*.json")) if p]
 posts = [p for p in posts if not p["lang"].lower().startswith("zh")]
 posts.sort(key=lambda p: int(p["id"]), reverse=True)
 now = datetime.now(timezone.utc).astimezone().strftime("%b %-d, %Y, %-I:%M %p %Z")
@@ -171,7 +178,7 @@ nsynd = 0
 today_count = 0
 today_str = datetime.now(timezone.utc).astimezone().strftime("%b %-d, %Y")
 for p in posts:
-    sp = f'/tmp/synd/{p["id"]}.json'
+    sp = f'{CACHE}/synd/{p["id"]}.json'
     if os.path.exists(sp):
         s = json.load(open(sp))
         url, search, card = card_from_synd(s, p)
